@@ -1,0 +1,24 @@
+# Personal paths & environment
+.Rproj.user
+*.Rprofile
+.Ruserdata
+.Renviron
+
+
+# R session artifacts
+.Rhistory
+.RData
+
+
+results/
+plots/
+figure/
+omnipathr-log/
+data/
+
+
+#*.html
+*.png
+*.xlsx
+*.RDS
+*.rds
