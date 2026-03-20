@@ -1,0 +1,47 @@
+This document summarizes the performed analysis steps of the bulk-RNA-Seq Analysis as published in [Krauß et al (2025) EMBO Mol Med.](https://doi.org/10.1038/s44321-025-00240-4)
+DOI: 10.1038/s44321-025-00240-4
+
+
+Data availability from [GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE263594)
+
+
+## Notes {.tabset}
+
+Samples:
+  
+-   AKP = KRASG12D, P53, APC, EGFRwt
+-   AKPE = KRASG12D, P53, APC, EGFRdelta
+-   AP - KRASwt, P53, APC EGFRwt
+
+
+### Mouse Model {.tabset}
+[Fig 1](https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs44321-025-00240-4/MediaObjects/44321_2025_240_Fig1_HTML.png?as=webp)
+
+<div style="width:400px; height:100px; overflow:hidden;">
+  <img src="https://media.springernature.com/full/springer-static/image/art%3A10.1038%2Fs44321-025-00240-4/MediaObjects/44321_2025_240_Fig1_HTML.png?as=webp"
+       style="margin-top:0;">
+</div>
+
+
+[Figure EV1](https://media.springernature.com/full/springer-static/esm/art%3A10.1038%2Fs44321-025-00240-4/MediaObjects/44321_2025_240_Fig9_ESM.jpg?as=webp)
+
+<div style="width:400px; height:200px; overflow:hidden;">
+  <img src="https://media.springernature.com/full/springer-static/esm/art%3A10.1038%2Fs44321-025-00240-4/MediaObjects/44321_2025_240_Fig9_ESM.jpg?as=webp"
+       style="margin-top:0;">
+</div>
+
+
+
+
+### RNA Seq Protocol {.tabset}
+
+Library preparation and total transcriptome mRNAsequencing was performed by Novogene UK using the NovaSeq 6000 Illumina Platform. Preprocessing and mapping of sequence reads to the mouse genome GRCm38/mm10 and GENECODE M25 annotations was achieved by the nf-core RNASeq pipeline version 3.2 (Ewels et al, 2020). Briefly, reads were mapped by STAR 2.6.1 d(Dobin et al, 2013) and quantified by Salmon v1.4.0 (Patro et al, 2017). Subsequent analysis was performed using the statistical computing environment R v. 4.1.0 (R Core Team, 2022). Differential gene expression levels were identified by Bioconductor package DESeq2 (Love et al, 2014) and interpretation of biological significance of differential gene expression, Gene Ontology enrichment analysis was performed with the package ClusterProfiler v4.1.0 (Yu et al, 2012). GSEA analysis was performed for genelists using signal-to-noise ratios for gene ranking and significance of enrichment was estimated using 1000 gene permutation. Pathway activity scores were assessed from normalized counts by the PROGENy (Pathway RespOnsive GENes) approach (Schubert et al, 2018). Heatmaps generated using ComplexHeatmap v. 2.10.0 (Gu et al, 2016) and ggplot2 (Wickham, 2016). Metabolic subsetting RECON3D (Brunk et al, 2018; Khodaee et al, 2020).
+
+
+
+### Analysis Notes {.tabset}
+
+*Previous processing steps & Not included here*
+
+-   Fastq files to ICBI server - aligned with Nextflow
+-   on GEO as [GSE263594](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE263594)
