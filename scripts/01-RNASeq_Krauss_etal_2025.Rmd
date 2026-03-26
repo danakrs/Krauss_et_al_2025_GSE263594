@@ -1,13 +1,13 @@
 ---
-title: "Bulk RNASeq - Part 1"
-author: "Dana Krauss"
+title: "Bulk RNASeq - GSE263594"
+author: "Dana Krauß"
 date: "`r format(Sys.time(), '%Y-%m-%d')`"
 output:
     workflowr::wflow_html:
         code_folding: hide
         df_print: paged
         toc: true
-        toc_float: false #true
+        toc_float: true
         toc_depth: 5
         theme:
           bootswatch: "flatly"
@@ -196,6 +196,10 @@ DT::datatable(data.frame(sampleAnno),
 
 
 
+---------------------------------------------------------------------
+
+
+
 # 1 - DESeq2 Analysis
 
 ## Count distribution
@@ -252,6 +256,10 @@ plotDispEsts(dds)
 saveRDS(dds, file.path(data_dir,paste0(tag ,"_dds_DESeq2.rds")))
 ```
 
+
+
+
+---------------------------------------------------------------------
 
 
 
@@ -407,8 +415,8 @@ DT::datatable(plot_GOI,
 
 ## Hypothesis Testing {.tabset .tabset-pills}
 
-### Run Contrasts {.tabset}
-Creates all_results & all_extracted lists
+**Run Contrasts**: Creates all_results & all_extracted lists
+
 ```{r}
 ### Define functions
 run_deseq_results <- function(dds, contrast) {
@@ -439,8 +447,14 @@ run_deseq_results <- function(dds, contrast) {
 
 
 extract_and_export <- function(dds, result, tag, results_dir,
-                               fdr_cutoff, fc_cutoff) {
+                               fdr_cutoff, fc_cutoff,contrasts) {
 
+  ## ---- subset dds to contrast groups ----
+  contrast_samples <- as.data.frame(colData(dds)) %>%
+    dplyr::filter(group %in% contrast[2:3]) %>%
+    rownames()
+  dds_sub <- dds[, contrast_samples]
+  
   ## ---- DE results table ----
   res_tbl <- result %>%
     as.data.frame() %>%
@@ -491,14 +505,18 @@ dir.create(
   showWarnings = FALSE
 )
 
-export_counts <- list(
-
-  RawCounts_min10reads = counts(dds, normalized = FALSE) %>%
-    tibble::as_tibble(rownames = "SYMBOL"),
-
-  normalizedCounts = counts(dds, normalized = TRUE) %>%
-    tibble::as_tibble(rownames = "SYMBOL")
-)
+  export_counts <- list(
+    # full experiment (all samples)
+    RawCounts_allSamples        = counts(dds, normalized = FALSE) %>%
+      tibble::as_tibble(rownames = "SYMBOL"),
+    NormCounts_allSamples       = counts(dds, normalized = TRUE) %>%
+      tibble::as_tibble(rownames = "SYMBOL"),
+    # contrast samples only
+    RawCounts_contrastSamples   = counts(dds_sub, normalized = FALSE) %>%
+      tibble::as_tibble(rownames = "SYMBOL"),
+    NormCounts_contrastSamples  = counts(dds_sub, normalized = TRUE) %>%
+      tibble::as_tibble(rownames = "SYMBOL")
+  )
 
 writexl::write_xlsx(
   export_counts,
@@ -575,41 +593,12 @@ all_extracted <- purrr::map(
 
 ```
 
-### Theory
-
-**Hypothesis Testing**
-
--   RNA-seq exhibits overdispersion (variance\>mean) -\> statistical distribution needs to account
--   NB Distribution
-
-![](https://hbctraining.github.io/DGE_workshop_salmon/img/NB_model_formula.png)
-
-*Wald test*
-
--   usually for parameters estimated by maximum likelihood
--   testing each gene model coefficient (LFC) Steps:
--   LFC divided by SE -\> z-statistic
--   z-stats compared to normal distribution, compute p-val
-
-*Multiple Testing*
-
--   inflation of false positive rate
--   FDR/BH is integrated in DESeq2
 
 
-
-
-
+### Result Lists {.tabset}
 #### Comparisons {.tabset .tabset-pills}
 
-Extract and save results
 
--   baseMean: mean of normalized counts for all samples
--   log2FoldChange: log2 fold change
--   lfcSE: standard error
--   stat: Wald statistic
--   pvalue: Wald test p-value
--   padj: BH adjusted p-values
 
 
 
@@ -634,6 +623,36 @@ out <- knit_child(text = unlist(src_list), options = list(cache = FALSE))
 
 `r out`
 
+### Theory
+
+**Hypothesis Testing**
+
+-   RNA-seq exhibits overdispersion (variance\>mean) -\> statistical distribution needs to account
+-   NB Distribution
+
+![](https://hbctraining.github.io/DGE_workshop_salmon/img/NB_model_formula.png)
+
+*Wald test*
+
+-   usually for parameters estimated by maximum likelihood
+-   testing each gene model coefficient (LFC) Steps:
+-   LFC divided by SE -\> z-statistic
+-   z-stats compared to normal distribution, compute p-val
+
+*Multiple Testing*
+
+-   inflation of false positive rate
+-   FDR/BH is integrated in DESeq2
+
+
+Extract and save results contain:
+
+-   baseMean: mean of normalized counts for all samples
+-   log2FoldChange: log2 fold change
+-   lfcSE: standard error
+-   stat: Wald statistic
+-   pvalue: Wald test p-value
+-   padj: BH adjusted p-values
 
 ## Plot Comparisons
 ### N° of DEG genes {.tabset .tabset-pills}
@@ -789,6 +808,10 @@ plot(fit,
 ```
 
 
+---------------------------------------------------------------------
+
+
+
 
 
 ### All Count Tables {.tabset .tabset-pills}
@@ -807,7 +830,7 @@ src_list <- lapply(names(all_extracted), function(contrast_name) {
   )
 
   ## build tabs inside each contrast
-  tabs <- lapply(names(export_counts), function(x) {
+  tabs <- lapply(c("RawCounts_contrastSamples","NormCounts_contrastSamples"), function(x) {
     c(
       paste0("##### ", x, " {.unnumbered}"),
       paste0("```{r ", contrast_name, "_", x, "}"),
@@ -837,6 +860,8 @@ out <- knit_child(text = unlist(src_list), options = list(cache = FALSE))
 
 
 ---------------------------------------------------------------------
+
+
 
 # 4 - Plots
 
@@ -977,6 +1002,10 @@ out <- knit_child(text = unlist(src_list), options = list(cache = FALSE))
 ```
 
 `r out`
+
+
+
+---------------------------------------------------------------------
 
 
 
@@ -1327,6 +1356,10 @@ out <- knit_child(text = unlist(src_list), options = list(cache = FALSE))
 ```
 
 `r out`
+
+
+
+---------------------------------------------------------------------
 
 
 
@@ -1821,45 +1854,4 @@ make_advanced_heatmap(
 ```{r}
 sessionInfo()
 ```
-
-
-```{r, eval = F, include = F}
-all_pkgs <- installed.packages()
-
-pkg_df <- data.frame(
-  Package = all_pkgs[, "Package"],
-  Version = all_pkgs[, "Version"],
-  LibPath = all_pkgs[, "LibPath"],
-  stringsAsFactors = FALSE
-)
-
-write.csv(pkg_df, file.path(data_dir,paste0("_all_installed_packages.csv")), row.names = FALSE)
-
-loaded_pkgs <- sessionInfo()$otherPkgs
-loaded_names <- names(loaded_pkgs)
-
-# include base + recommended too
-base_pkgs <- sessionInfo()$basePkgs
-all_used <- unique(c(loaded_names, base_pkgs))
-writeLines(all_used, file.path(data_dir,paste0(tag,"_loaded_packages.txt")))
-
-
-
-
-deps <- tools::package_dependencies(
-  packages = all_used,
-  recursive = TRUE
-)
-
-dep_names <- unique(unlist(deps))
-
-writeLines(dep_names, file.path(data_dir,paste0(tag,"_recursive_dependencies.txt")))
-
-
-full_pkg_list <- unique(c(all_used, dep_names))
-
-writeLines(full_pkg_list, file.path(data_dir,paste0(tag,"_full_package_list.txt")))
-
-```
-
 

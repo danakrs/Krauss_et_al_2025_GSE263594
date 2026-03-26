@@ -11,7 +11,7 @@ Samples:
   
 -   AKP = KRASG12D, P53, APC, EGFRwt
 -   AKPE = KRASG12D, P53, APC, EGFRdelta
--   AP - KRASwt, P53, APC EGFRwt
+-   AP = KRASwt, P53, APC EGFRwt
 
 
 ### Mouse Model {.tabset}
