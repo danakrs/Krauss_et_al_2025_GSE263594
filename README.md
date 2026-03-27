@@ -6,7 +6,7 @@ This repository contains the analysis workflow for [GSE263594](https://www.ncbi.
 DOI: 10.1038/s44321-025-00240-4
 
 
-[Full rendered report](https://htmlpreview.github.io/?https://github.com/danakrs/Krauss_et_al_2025_GSE263594/blob/main/scripts/01-RNASeq_Krauss_etal_2025.html)
+[Full rendered report]([https://htmlpreview.github.io/?https://github.com/danakrs/Krauss_et_al_2025_GSE263594/blob/main/scripts/01-RNASeq_Krauss_etal_2025.html](https://danakrs.github.io/Krauss_et_al_2025_GSE263594/))
 
 
 ---
