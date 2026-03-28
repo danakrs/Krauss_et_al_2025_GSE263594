@@ -15,6 +15,9 @@ output:
           secondary: "#1B9E77"
           text-primary: "#D0006F"
           text-secondary: "#D0006F"
+        self_contained: true  
+    html_document:
+        self_contained: true
 params: 
   project: "DESeq2_AKP_AKPE_AP"   
   user_dir: "/Krauss_et_al_2025_GSE263594" 
@@ -447,7 +450,7 @@ run_deseq_results <- function(dds, contrast) {
 
 
 extract_and_export <- function(dds, result, tag, results_dir,
-                               fdr_cutoff, fc_cutoff,contrasts) {
+                               fdr_cutoff, fc_cutoff,contrast) {
 
   ## ---- subset dds to contrast groups ----
   contrast_samples <- as.data.frame(colData(dds)) %>%
@@ -582,7 +585,8 @@ all_extracted <- purrr::map(
       tag         = contrast_name,
       results_dir = file.path(results_dir, contrast_name),
       fdr_cutoff  = fdr_cutoff,
-      fc_cutoff   = fc_cutoff
+      fc_cutoff   = fc_cutoff,
+      contrast    = contrasts[[contrast_name]]
     )
   }
 ) %>%
