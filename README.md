@@ -72,6 +72,7 @@ Package Version Information in the rendered .html file or [here](https://github.
 ├── plots/           # (ignored) figures
 ├── README.md
 ├── .gitignore
+├── .Renviron        # create variable called USER_DIR= (dir to Projectfolder location)
 ```
 
 
