@@ -1921,7 +1921,7 @@ head(pkg_df, 20)
 nrow(pkg_df)
 
 # Export to CSV
-write.csv(pkg_df, "docs/session_packages.csv", row.names = FALSE)
+utils::write.csv(pkg_df, "docs/session_packages.csv", row.names = FALSE)
 
 
 
