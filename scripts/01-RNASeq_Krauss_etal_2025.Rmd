@@ -1857,7 +1857,7 @@ sessionInfo()
 
 
 Save all packages as dataframe
-```{r, eval = T, include = T}
+```{r, eval = F, include = T}
 
 
 # Get all installed packages with version info

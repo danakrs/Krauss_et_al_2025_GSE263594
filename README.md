@@ -54,7 +54,7 @@ Sequencing data is publicly available via GEO:
 * Reference genome: GRCm38/mm10 (GENCODE M25)
 
 Downstream analysis performed in R (4.5.1).
-Package Version Information in the rendered .html file.
+Package Version Information in the rendered .html file or [here](https://github.com/danakrs/Krauss_et_al_2025_GSE263594/docs/session_packages.csv)
 ---
 
 
@@ -64,13 +64,17 @@ Package Version Information in the rendered .html file.
 ## Project Structure
 
 ```
-├── scripts/         # analysis scripts
+├── scripts/         # analysis & rendered scripts
+├── docs/            # full package/version information + page build file
 ├── data/            # (ignored) downloaded data
 ├── results/         # (ignored) output tables
 ├── plots/           # (ignored) figures
 ├── README.md
 ├── .gitignore
 ```
+
+
+
 
 ---
 
