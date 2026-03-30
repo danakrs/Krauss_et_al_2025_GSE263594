@@ -1486,8 +1486,6 @@ pathways <- list(
     
     "Prps1","Rpia", "Hk1","H6pd",  "Ldhb", "G6pc3","Aldh1b1","Pklr"),
   "TCA / OXPHOS" = c("Idh1","Idh2","Idh3a","Sdhb","Sdhd","Pdk2","Pdp2","Uqcrc2","Cyc1","Ndufs2","Tcirg1","Acss1"),
-    #"Fatty Acid Metabolism"        = c("Ehhadh", "Acox3", "Acads","Cpt2","Chpt1", "Cds1", "Fads1","Fads2", "Acacb","Faah","Acot11","Slc27a1","Slc27a2"),
-  #"Phospholipid Metabolism"         = c( "Agps","Cept1","Enpp2","Agpat2","Agpat4","Agpat5","Pgs1"),
   "Glutamine Metabolism" = c("Aldh4a1","Gad1", "Ctps2","Nsf","Slc1a1","Glud1", "Oat","Pycr2","Ddah1")
 )
 
@@ -1649,11 +1647,9 @@ pathways <- list(
     "WNT PATHWAY"            = c("Alox12", "Apcdd1","Cd244","Cubn","Dmd", "Fgd1","Fzd2", "Gdf11","Lef1","Myb","Nkd1","Rhobtb3", "Ror1","Sbspon","Sntb1","Tcf7l1","Tesc","Tox","Vim","Wif1", "Wnt10b", "Wnt16", "Wnt5b"),
 
     "STEM CELL SIGNALLING"            = c( "Bmp1", "Bmp7", "Cplx2","Neurog3","Prelp","Prox1", "Reg4", 
-  #between
   
   "Atoh1","Bcl11b","Boc","Cachd1","Cited4","Cpn1","Ctxn1", "Dach1","Dmpk","Fads1","Gas6","Gramd1a", "Igfbp4","Insm1","Itgb8", "Lyz1","Mex3a","Mpp3", "Muc1", "Nrep",
-  
-  #"Perp","S100a6","Tm4sf1","Egfr","Gsdmc2","Krt13","Areg","Slc28a3",
+
   "Slc16a12", "Slc27a2", "Smoc2","Spdef","Spink4","Spp1","T","Tead2","Tff3", "Tlr2","Txndc16","Zfp503","Zfp704")
     
 
@@ -1756,7 +1752,7 @@ gs_publications <- list("Canonical Wnt Signaling" =
                         c("Wls","Porcn", "Lrp5","Lrp6","Dvl1", "Dvl2", "Dvl3",
                           "Fzd1","Fzd2","Fzd6", "Fzd7","Fzd10",
                              "Apc", "Axin1", "Axin2", "Gsk3a", "Gsk3b", "Ctnna1", "Ctnna2",
-                             "Rnf43","Znrf3" ,"Lgr5", # RSponidn ligand interction
+                             "Rnf43","Znrf3" ,"Lgr5", 
                              "Lef1", "Tcf4"),
                         "Non-Canonical planar cell polarity (PCP)" = 
                              c("Wnt2b","Wnt3", "Wnt4", "Wnt6","Wnt7a","Wnt7b","Wnt16"),
@@ -1858,4 +1854,77 @@ make_advanced_heatmap(
 ```{r}
 sessionInfo()
 ```
+
+
+Save all packages as dataframe
+```{r, eval = T, include = T}
+
+
+# Get all installed packages with version info
+all_pkgs <- as.data.frame(installed.packages()[, c("Package", "Version")], 
+                           stringsAsFactors = FALSE)
+
+# Get session info
+sess <- sessionInfo()
+
+# Combine loaded packages (attached + loaded namespaces) + base packages
+loaded_names <- c(
+  names(sess$otherPkgs),      # explicitly attached (library())
+  names(sess$loadedOnly),     # loaded but not attached
+  sess$basePkgs               # base R packages
+)
+loaded_names <- unique(loaded_names)
+
+# Recursive dependency resolver
+get_deps <- function(pkg_names, all_pkgs_df) {
+  collected <- c()
+  to_process <- pkg_names
+  
+  while (length(to_process) > 0) {
+    pkg <- to_process[1]
+    to_process <- to_process[-1]
+    
+    if (pkg %in% collected || !pkg %in% all_pkgs_df$Package) next
+    collected <- c(collected, pkg)
+    
+    # Get Imports, Depends, LinkingTo fields
+    desc <- tryCatch(packageDescription(pkg), error = function(e) NULL)
+    if (is.null(desc)) next
+    
+    dep_fields <- c(desc$Imports, desc$Depends, desc$LinkingTo)
+    dep_fields <- dep_fields[!is.null(dep_fields)]
+    
+    if (length(dep_fields) > 0) {
+      # Parse package names (strip version constraints)
+      raw_deps <- unlist(strsplit(paste(dep_fields, collapse = ","), ","))
+      dep_pkgs  <- trimws(gsub("\\(.*\\)", "", raw_deps))
+      dep_pkgs  <- dep_pkgs[dep_pkgs != "" & dep_pkgs != "R"]
+      to_process <- unique(c(to_process, dep_pkgs[!dep_pkgs %in% collected]))
+    }
+  }
+  collected
+}
+
+# Resolve all deps recursively
+all_used_with_deps <- get_deps(loaded_names, all_pkgs)
+
+# Build final dataframe
+pkg_df <- all_pkgs[all_pkgs$Package %in% all_used_with_deps, ]
+pkg_df <- pkg_df[order(pkg_df$Package), ]
+rownames(pkg_df) <- NULL
+
+# Add a column flagging directly loaded vs pulled in as dependency
+pkg_df$source <- ifelse(pkg_df$Package %in% loaded_names, "loaded", "dependency")
+
+# Preview
+head(pkg_df, 20)
+nrow(pkg_df)
+
+# Export to CSV
+write.csv(pkg_df, "docs/session_packages.csv", row.names = FALSE)
+
+
+
+```
+
 
